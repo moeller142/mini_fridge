@@ -20,7 +20,7 @@ PlayState.create = function () {
 
 
     //Switch the background colour back to white from purple
-    this.game.stage.color = 'ffffff';
+    this.game.stage.color = '999999';
 
     //Variables relating to the state of the game
     this.gameStarted = false;
@@ -32,19 +32,23 @@ PlayState.create = function () {
     this.ySpeed = 0;
     this.maxYSpeed = 16;
 
-    this.flapSpeed = -16;
-    this.pipeDistance = 400;
-    this.pipeGap = 260;
+    //speed that pushing a button makes
+    this.moveSpeed = -5;
 
-    //The starting coordinates of the bird.
-    this.startX = (this.game.stage.width / 2) - 46
-    this.startY = (this.game.stage.height / 2) - 64;
+
+    this.flapSpeed = -16;
+    this.pipeDistance = 200;
+    this.pipeGap = 600;
+
+    //The starting coordinates of the box.
+    this.startX = (this.game.stage.width / 2);
+    this.startY = (this.game.stage.height) - 200;
 
     //Background image
-    this.bg = new Kiwi.GameObjects.Sprite(this, this.textures.background, 0, 0);
-    this.addChild(this.bg);
+    //this.bg = new Kiwi.GameObjects.Sprite(this, this.textures.background, 0, 0);
+    //this.addChild(this.bg);
 
-    //Obstacles
+   /* //Obstacles
     this.pipes = [];
     for (var j = 0; j < 3; j++) {
         var topPipe = new Kiwi.GameObjects.Sprite(this, this.textures.pipe, j * this.pipeDistance + 400 + this.game.stage.width, -Math.random() * 300 - 400);
@@ -57,10 +61,10 @@ PlayState.create = function () {
         bottomPipe.passed = false;
         bottomPipe.myTop = topPipe;
         this.pipes.push(bottomPipe);
-    }
+    }*/
 
     //Scrolling floor
-    this.tileWidth = 37;
+    /*this.tileWidth = 37;
     this.tiles = [];
     var tileCount = Math.ceil(this.game.stage.width / this.tileWidth);
     for (var i = 0; i <= tileCount; i++) {
@@ -68,21 +72,31 @@ PlayState.create = function () {
         this.addChild(t);
         this.tiles.push(t);
     }
+*/
 
     //Flapper
     this.bird = new Kiwi.GameObjects.Sprite(this, this.textures.bird, this.startX, this.startY);
-    this.bird.animation.add('flap', [0, 1, 2], 0.1, true);
-    this.bird.animation.play('flap');
+    //this.bird.animation.add('flap', [0, 1, 2], 0.1, true);
+    //this.bird.animation.play('flap');
     this.addChild(this.bird);
 
     this.birdWidth = this.bird.width;
     this.birdHeight = this.bird.height;
 
     //Input event for the flapper
-    this.game.input.onDown.add(this.flap, this);
+    //this.game.input.onDown.add(this.flap, this);
+
+    //create key objects for input
+    this.DKey = this.game.input.keyboard.addKey( Kiwi.Input.Keycodes.D);
+    this.FKey = this.game.input.keyboard.addKey( Kiwi.Input.Keycodes.F);
+    this.GKey = this.game.input.keyboard.addKey( Kiwi.Input.Keycodes.G);
+    this.HKey = this.game.input.keyboard.addKey( Kiwi.Input.Keycodes.H);
+    this.JKey = this.game.input.keyboard.addKey( Kiwi.Input.Keycodes.J);
+    this.KKey = this.game.input.keyboard.addKey( Kiwi.Input.Keycodes.K);
+
 
     //create, then hide buttons
-    this.buttonX = this.game.stage.width / 2 - 107
+    this.buttonX = this.game.stage.width / 2 - 107;
     this.restartBtn = new Kiwi.GameObjects.Sprite(this, this.textures.restart, -217, this.game.stage.height / 2 - 150, true);
     this.addChild(this.restartBtn);
     this.restartBtn.input.onDown.add(this.restartGame, this);
@@ -95,6 +109,36 @@ PlayState.create = function () {
     this.score = 0;
     this.scoreText = new Kiwi.GameObjects.Textfield(this, '0', 50, 50, '#FFF');
     this.addChild(this.scoreText);
+}
+
+/*
+Move box methods
+ */
+
+PlayState.moveMiddleBoxLeft = function () {
+    this.gameStarted = true;
+    this.xSpeed =  this.moveSpeed;
+
+}
+
+PlayState.moveMiddleBoxRight = function () {
+    this.gameStarted = true;
+    this.xSpeed = -1 * this.moveSpeed;
+
+}
+
+
+
+PlayState.keyPressed = function (keycode, object) {
+
+    if (this.GKey.isDown) {
+        this.moveMiddleBoxLeft();
+    }
+
+    if (this.HKey.isDown) {
+        this.moveMiddleBoxLeft();
+    }
+
 }
 
 /**
@@ -135,6 +179,7 @@ PlayState.shareGame = function () {
 }
 
 
+
 /**
 * This method is executed when the user clicks.
 * @method flap
@@ -153,24 +198,38 @@ PlayState.flap = function () {
 */
 PlayState.update = function () {
     Kiwi.State.prototype.update.call(this);
+
     if (this.gameStarted) {
-        //update bird y speed and check collisions
-        if (this.bird.transform.y < this.game.stage.height) {
-            this.bird.transform.y += this.ySpeed;
-            if (this.ySpeed < this.maxYSpeed) this.ySpeed += this.gravity;
-            if (this.bird.transform.y < 0) this.bird.transform.y = 0;
-            if (this.bird.transform.y > 704){
-                this.killBird();
-                return;
-            }
+
+        if (this.bird.transform.x < this.game.stage.width) {
+
+            this.bird.transform.x += this.xSpeed;
+
         }
-        //update bird rotation based on speed (in radians)
-        if (this.ySpeed > 14) {
-            this.bird.transform.rotation = Math.PI / 2;
-        } else if (this.ySpeed > 6) {
-            this.bird.transform.rotation = Math.PI / 6;
-        } else {
-            this.bird.transform.rotation = -Math.PI / 6;
+
+        //FIXME(quinton): this is not when this should be happening
+        //make bird face up
+        this.bird.transform.rotation = -Math.PI / 2;
+    }
+
+
+
+    if (this.GKey.isDown) {
+        this.moveMiddleBoxLeft();
+    }
+
+    else if (this.HKey.isDown) {
+        this.moveMiddleBoxRight();
+    }
+
+    else {
+
+        if (this.xSpeed > 0) {
+            this.xSpeed -= 1;
+        }
+
+        else if (this.xSpeed < 0) {
+            this.xSpeed += 1;
         }
     }
 
@@ -205,8 +264,8 @@ PlayState.update = function () {
                 }
 
                 if (this.checkCollision(pipe)) {
-                    this.killBird();
-                    return;
+                        this.killBird();
+                        return;
                 }
             }
         }
