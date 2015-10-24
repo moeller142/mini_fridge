@@ -67,21 +67,26 @@ PlayState.create = function () {
     /*this.tileWidth = 37;
     this.tiles = [];
     var tileCount = Math.ceil(this.game.stage.width / this.tileWidth);
-    for (var i = 0; i <= tileCount; i++) {
+    for (var i = 0; i <= tileCount;ß i++) {
         var t = new Kiwi.GameObjects.Sprite(this, this.textures.ground, i * this.tileWidth, this.game.stage.height - 128);
         this.addChild(t);
         this.tiles.push(t);
     }
 */
 
-    //Flapper
-    this.bird = new Kiwi.GameObjects.Sprite(this, this.textures.bird, this.startX, this.startY);
-    //this.bird.animation.add('flap', [0, 1, 2], 0.1, true);
-    //this.bird.animation.play('flap');
-    this.addChild(this.bird);
+    //FIXME(quinton): something is wrong here,
 
-    this.birdWidth = this.bird.width;
-    this.birdHeight = this.bird.height;
+    //player box
+    this.playerBox = new Kiwi.Plugins.Primitives.Rectangle( {
+        state: this,
+        width: 100,
+        height: 100,
+        centerOnTransform: true,
+        x: this.startX,
+        y: this.startY
+    });
+
+    this.addChild(this.playerBox);
 
     //Input event for the flapper
     //this.game.input.onDown.add(this.flap, this);
@@ -158,9 +163,9 @@ PlayState.restartGame = function () {
         if (pipe.transform.rotation == 0) pipe.passed = false;
     }
 
-    this.bird.transform.x = this.startX;
-    this.bird.transform.y = this.startY;
-    this.bird.transform.rotation = 0;
+    this.playerBox.transform.x = this.startX;
+    this.playerBox.transform.y = this.startY;
+    this.playerBox.transform.rotation = 0;
 
     this.restartBtn.transform.x = -217;
     this.shareBtn.transform.x = -217;
@@ -201,15 +206,15 @@ PlayState.update = function () {
 
     if (this.gameStarted) {
 
-        if (this.bird.transform.x < this.game.stage.width) {
+        if (this.playerBox.transform.x < this.game.stage.width) {
 
-            this.bird.transform.x += this.xSpeed;
+            this.playerBox.transform.x += this.xSpeed;
 
         }
 
         //FIXME(quinton): this is not when this should be happening
-        //make bird face up
-        this.bird.transform.rotation = -Math.PI / 2;
+        //make playerBox face up
+        this.playerBox.transform.rotation = -Math.PI / 2;
     }
 
 
@@ -255,7 +260,7 @@ PlayState.update = function () {
                         pipe.transform.y = pipe.myTop.transform.y + pipe.myTop.height + this.pipeGap;
                     }
 
-                    if (pipe.transform.x < this.bird.transform.x && !pipe.passed) {
+                    if (pipe.transform.x < this.playerBox.transform.x && !pipe.passed) {
                         this.score++;
                         this.scoreText.text = this.score;
                         console.log('score:', this.score);
@@ -263,46 +268,11 @@ PlayState.update = function () {
                     }
                 }
 
-                if (this.checkCollision(pipe)) {
-                        this.killBird();
-                        return;
-                }
+
+
             }
         }
     }
 }
 
 
-/**
-* This method checks to see if the bird is colliding with a given pipe.
-* @method checkCollision
-* @public
-* @param pipe{Sprite} The pipe to check colliding with the bird.
-*/
-PlayState.checkCollision = function (pipe) {
-    if (this.bird.transform.x + this.birdWidth > pipe.transform.x) {
-        if (this.bird.transform.x < pipe.transform.x + pipe.width) {
-            if (this.bird.transform.y + this.birdHeight > pipe.transform.y) {
-                if (this.bird.transform.y < pipe.transform.y + pipe.height) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-
-/**
-* This method is executed when the bird collides with a pipe.
-* @method killBird
-* @public
-*/
-PlayState.killBird = function () {
-    if (this.gameEnded) return;
-
-    this.gameEnded = true;
-
-    this.shareBtn.transform.x = this.buttonX;
-    this.restartBtn.transform.x = this.buttonX;
-}

@@ -32,7 +32,6 @@ LoadingState.preload = function () {
     //Otherwise the loading graphics will load last, and that defies the whole point in loading them. 
     KiwiLoadingScreen.prototype.preload.call(this);
 
-    this.addSpriteSheet('bird', 'assets/img/bird.png', 92, 64);
     this.addSpriteSheet('background', 'assets/img/background.png', 768, 896);
     this.addImage('ground', 'assets/img/ground.png');
     this.addImage('pipe', 'assets/img/pipe.png');
