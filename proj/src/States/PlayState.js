@@ -18,8 +18,6 @@ var PlayState = new Kiwi.State('PlayState');
 */
 PlayState.create = function () {
 
-
-
     //Switch the background colour back to white from purple
     this.game.stage.color = 'FFEDD1';
 
@@ -29,6 +27,12 @@ PlayState.create = function () {
     //Values pertaining to physics based logic 
     this.xAcceleration = 3;
     this.maxXSpeed = 9;
+
+    //enemy descriptions
+    this.enemyFallSpeed = 5;
+    this.enemyWidth = 60;
+    this.enemyHeight = 50;
+
 
 
     //The starting coordinates of the box.
@@ -45,6 +49,7 @@ PlayState.create = function () {
         centerOnTransform: true,
         x: this.startX,
         y: this.startY,
+        drawFill:  true,
         color: [17/255, 91/255, 137/255]
     });
 
@@ -52,8 +57,31 @@ PlayState.create = function () {
     this.playerBox.canMoveLeft = true;
     this.playerBox.canMoveRight = true;
 
-
     this.addChild(this.playerBox);
+
+
+
+
+    //enemies
+    this.splitters = [];
+
+    this.splitter1 = new Kiwi.Plugins.Primitives.Triangle( {
+
+        state: this,
+        points: [ [0,0], [this.enemyWidth / 2, this.enemyHeight * -1], [this.enemyWidth / 2 * -1, this.enemyHeight * -1]],
+        x: this.startX,
+        y: this.startY - 450,
+        color: [215/255, 2/255, 48/255],
+        strokeColor: [215/255, 2/255, 48/255],
+        drawFill: true,
+        drawStroke: true
+
+    });
+
+    this.splitter1.isOnScreen = false;
+
+    this.addChild(this.splitter1);
+    this.splitters.push(this.splitter1);
 
 
     //create key objects for input
@@ -160,6 +188,35 @@ PlayState.checkInput = function() {
 
 };
 
+/**
+ * moves any enemies which are on screen
+ *
+ */
+PlayState.moveSplitters = function (splitters) {
+
+    for (var i = 0; i<splitters.length; i++) {
+
+        //check to see which splitters are on screen
+        if (splitters[i].y - this.enemyHeight < this.game.stage.height) {
+
+            splitters[i].isOnScreen = true;
+
+        }
+
+        else {
+
+            splitters[i].isOnScreen = false;
+        }
+
+        if (splitters[i].isOnScreen) {
+
+            splitters[i].transform.y += this.enemyFallSpeed;
+        }
+
+    }
+
+};
+
 
 /**
 * This method is the main update loop. Move scrolling items here
@@ -172,11 +229,14 @@ PlayState.update = function () {
     if (this.gameStarted) {
 
         this.playerBox.transform.x += this.playerBox.velocity;
+        this.moveSplitters(this.splitters);
 
     }
 
     //check for keyboard input and set box velocity based on key pressed
     this.checkInput();
+
+
 
 };
 
