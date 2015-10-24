@@ -3,4 +3,4 @@ This file contains links to documentation files for the project
 Project design: https://docs.google.com/document/d/1ZouWS5lJcEDPYTbIp6cPDiFykZ6jUQrDrhHbD7ZZv9Q/edit
 Game design: https://docs.google.com/document/d/1aFSL8_5Kkuj800OQFfe15daxdmdJIJEzPjQ8quMlLpg/edit
 
-Color palette
+Color palette: https://coolors.co/app/ffedd1-d70230-115b89-1643a3-100330
