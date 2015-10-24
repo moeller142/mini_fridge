@@ -25,7 +25,8 @@ PlayState.create = function () {
     this.gameStarted = false;
 
     //Values pertaining to physics based logic 
-    this.xAcceleration = 3;
+    this.xAcceleration = .5;
+    this.friction = .1;
     this.maxXSpeed = 9;
 
     //enemy descriptions
@@ -33,7 +34,8 @@ PlayState.create = function () {
     this.enemyWidth = 60;
     this.enemyHeight = 50;
 
-
+    //keep track of how many frames of the game has gone by
+    this.frameCount = 0;
 
     //The starting coordinates of the box.
     this.startX = (this.game.stage.width / 2);
@@ -61,27 +63,8 @@ PlayState.create = function () {
 
 
 
-
-    //enemies
+    //enemies (FIFO queue)
     this.splitters = [];
-
-    this.splitter1 = new Kiwi.Plugins.Primitives.Triangle( {
-
-        state: this,
-        points: [ [0,0], [this.enemyWidth / 2, this.enemyHeight * -1], [this.enemyWidth / 2 * -1, this.enemyHeight * -1]],
-        x: this.startX,
-        y: this.startY - 450,
-        color: [215/255, 2/255, 48/255],
-        strokeColor: [215/255, 2/255, 48/255],
-        drawFill: true,
-        drawStroke: true
-
-    });
-
-    this.splitter1.isOnScreen = false;
-
-    this.addChild(this.splitter1);
-    this.splitters.push(this.splitter1);
 
 
     //create key objects for input
@@ -126,13 +109,13 @@ PlayState.moveBox = function (direction, box) {
 
         if (box.velocity < 0) {
 
-            box.velocity += 1;
+            box.velocity += this.friction;
 
         }
 
         else if (box.velocity > 0) {
 
-            box.velocity -= 1;
+            box.velocity -= this.friction;
 
         }
 
@@ -180,7 +163,7 @@ PlayState.checkInput = function() {
         this.moveBox("right", this.playerBox);
     }
 
-    else {
+    else if (this.playerBox.velocity != 0) {
 
         this.moveBox("stop", this.playerBox);
     }
@@ -196,27 +179,48 @@ PlayState.moveSplitters = function (splitters) {
 
     for (var i = 0; i<splitters.length; i++) {
 
-        //check to see which splitters are on screen
+        //if splitter is on screen
         if (splitters[i].y - this.enemyHeight < this.game.stage.height) {
 
-            splitters[i].isOnScreen = true;
+            splitters[i].transform.y += this.enemyFallSpeed;
 
         }
 
         else {
 
-            splitters[i].isOnScreen = false;
-        }
+            splitters.shift().destroy();
 
-        if (splitters[i].isOnScreen) {
 
-            splitters[i].transform.y += this.enemyFallSpeed;
         }
 
     }
 
 };
 
+/**
+ * Creates new enemy and adds it to the splitters queue
+ *
+ */
+PlayState.createEnemy = function () {
+
+    //create a new enemy
+    this.splitter1 = new Kiwi.Plugins.Primitives.Triangle( {
+
+        state: this,
+        points: [ [0,0], [this.enemyWidth / 2, this.enemyHeight * -1], [this.enemyWidth / 2 * -1, this.enemyHeight * -1]],
+        x: Math.floor(Math.random() * this.game.stage.width),
+        y: this.startY - 750,
+        color: [215/255, 2/255, 48/255],
+        strokeColor: [215/255, 2/255, 48/255],
+        drawFill: true,
+        drawStroke: true
+
+    });
+
+    this.addChild(this.splitter1);
+    this.splitters.push(this.splitter1);
+
+}
 
 /**
 * This method is the main update loop. Move scrolling items here
@@ -230,6 +234,20 @@ PlayState.update = function () {
 
         this.playerBox.transform.x += this.playerBox.velocity;
         this.moveSplitters(this.splitters);
+
+        // figure out if a new enemy should spawn
+        if ((this.frameCount % 20 == 0 && this.frameCount != 0) && (Math.random()  <= .7)) {
+
+            this.createEnemy();
+
+        }
+
+        //check to see if block hit a triangle
+
+        this.frameCount++;
+
+
+
 
     }
 
