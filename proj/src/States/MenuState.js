@@ -5,7 +5,7 @@ var MenuState = new Kiwi.State('MenuState');
 
 MenuState.create = function() {
     //Switch the background colour back to white from purple
-    this.game.stage.color = '999999';
+    this.game.stage.color = 'FFEDD1';
 
     this.playButton = new Kiwi.HUD.Widget.MenuItem(this.game, "Play", 0 ,0);
     this.playButton.style.color = 'white';
@@ -15,7 +15,8 @@ MenuState.create = function() {
     this.playButton.style.textAlign = 'center';
     this.playButton.style.cursor = 'pointer';
     this.playButton.style.padding = '0.5em 1em';
-    this.playButton.style.backgroundColor = '#843';
+    this.playButton.style.backgroundColor = '#115B89';
+    this.playButton.style.boxShadow = '0px 0px 5px #555';
 
 
     this.menu = new Kiwi.HUD.Widget.Menu(this.game, game.stage.width/2, game.stage.width/2);
