@@ -74,9 +74,9 @@ PlayState.create = function () {
     }
 */
 
-    //FIXME(quinton): something is wrong here,
 
-    //player box
+
+    //player boxes
     this.playerBox = new Kiwi.Plugins.Primitives.Rectangle( {
         state: this,
         width: 100,
@@ -85,6 +85,10 @@ PlayState.create = function () {
         x: this.startX,
         y: this.startY
     });
+
+    this.playerBox.velocity = 0;
+
+
 
     this.addChild(this.playerBox);
 
@@ -120,31 +124,45 @@ PlayState.create = function () {
 Move box methods
  */
 
-PlayState.moveMiddleBoxLeft = function () {
+PlayState.moveBox = function (direction, box) {
+
     this.gameStarted = true;
-    this.xSpeed =  this.moveSpeed;
 
-}
+    if (direction == "left") {
 
-PlayState.moveMiddleBoxRight = function () {
-    this.gameStarted = true;
-    this.xSpeed = -1 * this.moveSpeed;
+        box.velocity = this.moveSpeed;
 
-}
-
-
-
-PlayState.keyPressed = function (keycode, object) {
-
-    if (this.GKey.isDown) {
-        this.moveMiddleBoxLeft();
     }
 
-    if (this.HKey.isDown) {
-        this.moveMiddleBoxLeft();
+    else if (direction == "right") {
+
+        box.velocity = this.moveSpeed * -1;
+
     }
 
-}
+    else if (direction == "stop") {
+
+        if (box.velocity < 0) {
+
+            box.velocity += 1;
+
+        }
+
+        else if (box.velocity > 0) {
+
+            box.velocity -= 1;
+
+        }
+
+        else {
+
+            box.velocity = 0;
+        }
+
+    }
+
+};
+
 
 /**
 * This method is executed when the player resets the game.
@@ -169,7 +187,7 @@ PlayState.restartGame = function () {
 
     this.restartBtn.transform.x = -217;
     this.shareBtn.transform.x = -217;
-}
+};
 
 
 /**
@@ -181,7 +199,7 @@ PlayState.shareGame = function () {
     //Custom code relating to how you want to 'share' the game will need to go here.
     //Right now we are just going to redirect the user to kiwi.js.org :P
     window.open("http://www.kiwijs.org");
-}
+};
 
 
 
@@ -193,7 +211,30 @@ PlayState.shareGame = function () {
 PlayState.flap = function () {
     this.gameStarted = true;
     this.ySpeed = this.flapSpeed;
-}
+};
+
+
+/**
+ * this method checks for keyboard input and calls the appropriate move functions
+ */
+PlayState.checkInput = function() {
+
+    if (this.GKey.isDown) {
+        this.moveBox("left", this.playerBox);
+    }
+
+    else if (this.HKey.isDown) {
+        this.moveBox("right", this.playerBox);
+    }
+
+    else {
+
+        this.moveBox("stop", this.playerBox);
+    }
+
+
+};
+
 
 
 /**
@@ -208,35 +249,15 @@ PlayState.update = function () {
 
         if (this.playerBox.transform.x < this.game.stage.width) {
 
-            this.playerBox.transform.x += this.xSpeed;
+            this.playerBox.transform.x += this.playerBox.velocity;
 
         }
 
-        //FIXME(quinton): this is not when this should be happening
-        //make playerBox face up
-        this.playerBox.transform.rotation = -Math.PI / 2;
     }
 
+    //check for keyboard input and set box velocity based on key pressed
+    this.checkInput();
 
-
-    if (this.GKey.isDown) {
-        this.moveMiddleBoxLeft();
-    }
-
-    else if (this.HKey.isDown) {
-        this.moveMiddleBoxRight();
-    }
-
-    else {
-
-        if (this.xSpeed > 0) {
-            this.xSpeed -= 1;
-        }
-
-        else if (this.xSpeed < 0) {
-            this.xSpeed += 1;
-        }
-    }
 
     //move tiles
     if (!this.gameEnded) {
@@ -273,6 +294,6 @@ PlayState.update = function () {
             }
         }
     }
-}
+};
 
 
