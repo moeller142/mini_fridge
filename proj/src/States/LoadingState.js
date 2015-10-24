@@ -19,7 +19,7 @@
 * 3 - dimensions {Object} A Object containing the width/height that the game is to be. For example {width: 1024, height: 768}
 * 4 - subfolder {String} The folder that the loading graphics are located at. 
 */
-var LoadingState = new KiwiLoadingScreen('LoadingState', 'PlayState', {width: 768, height: 896}, 'assets/img/loading/');
+var LoadingState = new KiwiLoadingScreen('LoadingState', 'MenuState', {width: 768, height: 896}, 'assets/img/loading/');
 
 /**
 * This preload method is responsible for preloading all your in game assets.
