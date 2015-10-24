@@ -10,11 +10,27 @@ MenuState.create = function() {
     this.menu = new Kiwi.HUD.Widget.Menu(this.game, 0, 0);
     this.game.huds.defaultHUD.addWidget(this.menu);
 
+    this.createBackground();
     this.createPlayButton();
     this.createTutorialButton();
     this.drawGameText();
 
     this.animationStarted = false;
+};
+
+MenuState.createBackground = function() {
+    this.background = new Kiwi.HUD.Widget.MenuItem(this.game, "",
+        this.game.stage.width / 2 - 200,
+        this.game.stage.height / 2 - 100 - 30);
+    this.background.style.backgroundColor = 'white';
+    this.background.style.width = '400px';
+    this.background.style.height = '200px';
+    this.background.style.display = 'block';
+    this.background.style.boxSizing = 'border-box';
+    this.background.style.boxShadow = '0px 0px 15px #444';
+    //this.background.style.zIndex = '-1';
+
+    this.menu.addMenuItem(this.background);
 };
 
 MenuState.createPlayButton = function() {
@@ -61,7 +77,8 @@ MenuState.startGameSegue = function() {
     //hide all elements that are not play button
     var items = this.menu.menuItems;
     for (var i = 0; i < items.length; i++) {
-        if (items[i] !== this.playButton) {
+        if (items[i] !== this.playButton &&
+            items[i] !== this.background) {
             hideElement(items[i]);
         }
     }
@@ -76,6 +93,10 @@ MenuState.startGameSegue = function() {
 
 MenuState.update = function() {
     if (this.startAnimation) {
+        //move background up
+        this.background.y -= 40;
+
+        //move player to desired spot
         if (this.playButton.x > this.game.stage.width / 2 - 50) {
             this.playButton.x -= 5;
         }
@@ -85,6 +106,7 @@ MenuState.update = function() {
         if (this.playButton.y >= this.game.stage.height - 130 &&
             this.playButton.x <= this.game.stage.width / 2 - 50) {
             hideElement(this.playButton);
+            hideElement(this.background);
             game.states.switchState('PlayState');
         }
     }
@@ -100,6 +122,7 @@ function styleHeader(field) {
     field.style.fontWeight = '300';
     field.style.fontSize = 'xx-large';
     field.style.textAlign = 'center';
+    field.style.textShadow = '0px 0px 10px #888';
 }
 
 function styleButton(button) {
