@@ -39,11 +39,13 @@ PlayState.create = function () {
 
     //The starting coordinates of the box.
     this.startX = (this.game.stage.width / 2);
-    this.startY = (this.game.stage.height) - 200;
-
-
+    this.startY = (this.game.stage.height) - 70;
 
     //player boxes
+    this.playerBoxes =[];
+
+
+    //create initial player box
     this.playerBox = new Kiwi.Plugins.Primitives.Rectangle( {
         state: this,
         width: 100,
@@ -52,15 +54,17 @@ PlayState.create = function () {
         x: this.startX,
         y: this.startY,
         drawFill:  true,
+        drawStroke: false;
         color: [17/255, 91/255, 137/255]
     });
 
     this.playerBox.velocity = 0;
+    this.playerBox.weight = 4;
     this.playerBox.canMoveLeft = true;
     this.playerBox.canMoveRight = true;
-
     this.addChild(this.playerBox);
 
+    this.playerBoxes.push(this.playerBox);
 
 
     //enemies (FIFO queue)
@@ -223,6 +227,97 @@ PlayState.createEnemy = function () {
 }
 
 /**
+ * check to see if a box and a splitter collide. Returns true if they do
+ *
+ * @param box
+ * @param splitter
+ * @returns {boolean}
+ */
+
+PlayState.checkBoxSplitterCollision = function(box, splitter) {
+
+    return (splitter.x > box.x - 1/2 * box.width) &&
+        (splitter.x < box.x + 1/2* box.width) &&
+        (splitter.y == box.y - 1/2* box.height);
+
+
+};
+
+
+PlayState.splitBox = function(box, posInArray) {
+
+    // if the box can be split into 2
+    if (box.weight > 1 && this.playerBoxes.length < 3) {
+
+        //if the box is a 4 or 2 weight box
+        if (box.weight % 2 == 0) {
+
+            //delete the box
+            box.destroy();
+
+            //remove the box from the array of boxes
+            this.playerBoxes.splice(posInArray, 1);
+
+            //create two new boxes
+            this.createBox(box.weight / 2, box.x - box.width / 2);
+            this.createBox(box.weight / 2, box.x + box.width / 2);
+
+        }
+
+    }
+
+    // if the box can be made into one smaller box
+    else if (box.weight == 2) {
+
+        //destroy the box
+        box.destroy();
+
+        //remove the box from the array of boxes
+        this.playerBoxes.splice(posInArray,1);
+
+        //create a new box
+        this.createBox(box.weight / 2, box.x);
+
+    }
+
+
+    // the box must be destroyed
+    else {
+        box.destroy();
+
+    }
+
+    //return false if there are no more boxes
+    return (this.playerBoxes.length > 0)
+};
+
+
+PlayState.createBox = function (weight, xPos) {
+
+    this.playerBox = new Kiwi.Plugins.Primitives.Rectangle( {
+        state: this,
+        width: weight*25,
+        height: 100,
+        centerOnTransform: true,
+        x: xPos,
+        y: this.startY,
+        drawFill:  true,
+        drawStroke: false;
+        color: [17/255, 91/255, 137/255]
+    });
+
+    this.playerBox.velocity = 0;
+    this.playerBox.weight = weight;
+    this.playerBox.canMoveLeft = true;
+    this.playerBox.canMoveRight = true;
+    this.addChild(this.playerBox);
+
+    this.playerBoxes.push(this.playerBox);
+
+
+}
+
+/**
 * This method is the main update loop. Move scrolling items here
 * @method update
 * @public
@@ -242,7 +337,28 @@ PlayState.update = function () {
 
         }
 
-        //check to see if block hit a triangle
+        //check to see if any of the boxes hit any of the player boxes
+        //for each block
+        for (var j = 0; j < this.splitters.length; j++) {
+            // for each player
+            for (var i = 0; i < this.playerBoxes.length; i++ ){
+
+                //check if they collide
+                if (this.checkBoxSplitterCollision(this.playerBoxes[i], this.splitters[j])) {
+
+                    //if they do, split or destroy the box - if this is the last box  - GAME OVER
+                    if (!this.splitBox(this.playerBoxes[i])) {
+
+                        this.gameStarted = false;
+                        game.states.switchState("MenuState");
+
+                    }
+                }
+            }
+
+
+
+        }
 
         this.frameCount++;
 
