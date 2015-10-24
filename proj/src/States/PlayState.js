@@ -302,7 +302,7 @@ PlayState.createBox = function (weight, xPos) {
         x: xPos,
         y: this.startY,
         drawFill:  true,
-        drawStroke: false;
+        drawStroke: false,
         color: [17/255, 91/255, 137/255]
     });
 
