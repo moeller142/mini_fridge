@@ -13,6 +13,8 @@ MenuState.create = function() {
     this.createPlayButton();
     this.createTutorialButton();
     this.drawGameText();
+
+    this.animationStarted = false;
 };
 
 MenuState.createPlayButton = function() {
@@ -22,8 +24,8 @@ MenuState.createPlayButton = function() {
     this.playButton.y = this.game.stage.height / 2;
 
     this.playButton.input.onDown.add(function() {
-        game.states.switchState("PlayState");
-        this.hideButtons();
+        //game.states.switchState("PlayState");
+        this.startGameSegue();
     }, this);
 
     this.menu.addMenuItem(this.playButton);
@@ -48,12 +50,49 @@ MenuState.drawGameText = function() {
     this.menu.addMenuItem(this.gameText);
 };
 
-MenuState.hideButtons = function() {
+MenuState.hideElements = function() {
     var items = this.menu.menuItems;
-    for (var i = 0; i <  items.length; i++) {
-        items[i].style.display = 'none';
+    for (var i = 0; i < items.length; i++) {
+        hideElement(items[i]);
     }
 };
+
+MenuState.startGameSegue = function() {
+    //hide all elements that are not play button
+    var items = this.menu.menuItems;
+    for (var i = 0; i < items.length; i++) {
+        if (items[i] !== this.playButton) {
+            hideElement(items[i]);
+        }
+    }
+
+    this.playButton.text = '';
+    this.playButton.style.width = '100px';
+    this.playButton.style.height = '100px';
+    //do animation
+    this.startAnimation = true;
+    //game.switchState('PlayState');
+};
+
+MenuState.update = function() {
+    if (this.startAnimation) {
+        if (this.playButton.x > this.game.stage.width / 2 - 50) {
+            this.playButton.x -= 5;
+        }
+        if (this.playButton.y < this.game.stage.height - 130) {
+            this.playButton.y += 20;
+        }
+        if (this.playButton.y >= this.game.stage.height - 130 &&
+            this.playButton.x <= this.game.stage.width / 2 - 50) {
+            hideElement(this.playButton);
+            game.states.switchState('PlayState');
+        }
+    }
+};
+
+function hideElement (element) {
+    element.style.display = 'none';
+}
 
 function styleHeader(field) {
     field.style.display = 'block';
