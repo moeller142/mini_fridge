@@ -87,8 +87,10 @@ PlayState.create = function () {
     this.addChild(this.scoreText);
 }
 
-/*
-Move box methods
+/**
+ *  sets the velocity of param box, based on param direction.
+ * @param direction
+ * @param box
  */
 
 PlayState.moveBox = function (direction, box) {
@@ -155,8 +157,9 @@ PlayState.moveBox = function (direction, box) {
 
 
 /**
- * this method checks for keyboard input and calls the appropriate move functions
+ *  checks keyboard input and moves appropriate box.
  */
+
 PlayState.checkInput = function() {
 
     if (this.GKey.isDown && this.playerBox.canMoveLeft) {
@@ -243,6 +246,12 @@ PlayState.checkBoxSplitterCollision = function(box, splitter) {
 
 };
 
+/**
+ *
+ *@param box
+ * @param posInArray
+ * @returns {boolean}
+ */
 
 PlayState.splitBox = function(box, posInArray) {
 
@@ -252,15 +261,15 @@ PlayState.splitBox = function(box, posInArray) {
         //if the box is a 4 or 2 weight box
         if (box.weight % 2 == 0) {
 
-            //delete the box
-            box.destroy();
-
             //remove the box from the array of boxes
             this.playerBoxes.splice(posInArray, 1);
 
             //create two new boxes
             this.createBox(box.weight / 2, box.x - box.width / 2);
             this.createBox(box.weight / 2, box.x + box.width / 2);
+
+            //delete the box
+            box.destroy();
 
         }
 
@@ -269,29 +278,33 @@ PlayState.splitBox = function(box, posInArray) {
     // if the box can be made into one smaller box
     else if (box.weight == 2) {
 
-        //destroy the box
-        box.destroy();
-
         //remove the box from the array of boxes
         this.playerBoxes.splice(posInArray,1);
 
         //create a new box
-        this.createBox(box.weight / 2, box.x);
+        this.createBox(box.weight / 2, box.x + box.x);
 
+        //delete the box
+        box.destroy();
     }
 
 
     // the box must be destroyed
     else {
+        this.playerBoxes.splice(posInArray, 1);
         box.destroy();
-
     }
 
     //return false if there are no more boxes
     return (this.playerBoxes.length > 0)
 };
 
-
+/**
+ * this method will create a box with param weight at position xPos
+ *
+ * @param weight
+ * @param xPos
+ */
 PlayState.createBox = function (weight, xPos) {
 
     this.playerBox = new Kiwi.Plugins.Primitives.Rectangle( {
@@ -353,6 +366,10 @@ PlayState.update = function () {
                         game.states.switchState("MenuState");
 
                     }
+
+                    // make it so no other boxes can be split this frame
+                    j = 4;
+                    i = 4;
                 }
             }
 
