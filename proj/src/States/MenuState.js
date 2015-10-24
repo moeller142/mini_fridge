@@ -28,7 +28,6 @@ MenuState.createBackground = function() {
     this.background.style.display = 'block';
     this.background.style.boxSizing = 'border-box';
     this.background.style.boxShadow = '0px 0px 15px #444';
-    //this.background.style.zIndex = '-1';
 
     this.menu.addMenuItem(this.background);
 };
