@@ -147,20 +147,51 @@ PlayState.moveBox = function (direction, box) {
 
 PlayState.checkInput = function() {
 
-    if (this.GKey.isDown && this.playerBox.canMoveLeft) {
-        this.moveBox("left", this.playerBox);
+    //move left most box
+    if (this.DKey.isDown && this.playerBoxes[0].canMoveLeft) {
+        this.moveBox("left", this.playerBoxes[0]);
     }
 
-    else if (this.HKey.isDown && this.playerBox.canMoveRight) {
-        this.moveBox("right", this.playerBox);
+    else if (this.FKey.isDown && this.playerBoxes[0].canMoveRight) {
+        this.moveBox("right", this.playerBoxes[0]);
     }
 
-    else if (this.playerBox.velocity != 0) {
+    else if (this.playerBoxes[0].velocity != 0) {
 
-        this.moveBox("stop", this.playerBox);
+        this.moveBox("stop", this.playerBoxes[0]);
     }
 
+    //move middle/right box if two boxes
+    if (this.playerBoxes.length > 1) {
+        if (this.GKey.isDown && this.playerBoxes[1].canMoveLeft) {
+            this.moveBox("left", this.playerBoxes[1]);
+        }
 
+        else if (this.HKey.isDown && this.playerBoxes[1].canMoveRight) {
+            this.moveBox("right", this.playerBoxes[1]);
+        }
+
+        else if (this.playerBoxes[1].velocity != 0) {
+
+            this.moveBox("stop", this.playerBoxes[1]);
+        }
+    }
+
+    //move third box if 3 boxes
+    if (this.playerBoxes.length > 2) {
+        if (this.JKey.isDown && this.playerBoxes[2].canMoveLeft) {
+            this.moveBox("left", this.playerBoxes[2]);
+        }
+
+        else if (this.KKey.isDown && this.playerBoxes[2].canMoveRight) {
+            this.moveBox("right", this.playerBoxes[2]);
+        }
+
+        else if (this.playerBoxes[2].velocity != 0) {
+
+            this.moveBox("stop", this.playerBoxes[2]);
+        }
+    }
 };
 
 /**
@@ -286,7 +317,6 @@ PlayState.splitBox = function(box, posInArray) {
 
 /**
  * this method will create a box with param weight at position xPos
- *
  * @param weight
  * @param xPos
  */
@@ -341,6 +371,7 @@ PlayState.update = function () {
             // for each player
             for (var i = 0; i < this.playerBoxes.length; i++ ){
 
+
                 //check if they collide
                 if (this.checkBoxSplitterCollision(this.playerBoxes[i], this.splitters[j])) {
 
@@ -355,12 +386,19 @@ PlayState.update = function () {
                     // make it so no other boxes can be split this frame
                     j = 4;
                     i = 4;
+
+                    //sort the player boxes so key presses do the correct thing
+                    this.playerBoxes.sort(function(a,b) {
+                        return a.x = b.x;
+                    })
+
                 }
             }
 
-
-
         }
+
+        //check to see if any player boxes collide
+
 
         this.frameCount++;
 
