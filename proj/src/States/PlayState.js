@@ -101,7 +101,6 @@ PlayState.create = function () {
  */
 
 PlayState.moveBox = function (direction, box) {
-
     //first keypress should start game
     this.gameStarted = true;
     //keep track of what time the game started
@@ -110,59 +109,35 @@ PlayState.moveBox = function (direction, box) {
 
     //move the box left
     if (direction == "left") {
-
         if (Math.abs(box.velocity) < this.maxXSpeed) box.velocity -= this.xAcceleration;
-
-    }
-
-    else if (direction == "right") {
-
+    } else if (direction == "right") {
         if (Math.abs(box.velocity) < this.maxXSpeed) box.velocity += this.xAcceleration;
-
     }
 
     else if (direction == "stop") {
-
         if (box.velocity < 0) {
-
             box.velocity += this.friction;
-
-        }
-
-        else if (box.velocity > 0) {
-
+        } else if (box.velocity > 0) {
             box.velocity -= this.friction;
 
-        }
-
-        else {
-
+        } else {
             box.velocity = 0;
         }
-
     }
 
     box.transform.x += box.velocity;
 
-
     box.canMoveRight = true;
     box.canMoveLeft = true;
 
-    if ((box.x - box.width/2) < 0) {
-
+    if ((box.x - box.width/2) < 0 && direction == "left") {
         box.canMoveLeft = false;
         box.velocity = 0;
-
-
     }
-
-    if ((box.x + box.width/2) > this.game.stage.width) {
-
+    if ((box.x + box.width/2) > this.game.stage.width && direction == "right") {
         box.canMoveRight = false;
         box.velocity = 0;
-
     }
-
 };
 
 
