@@ -24,6 +24,10 @@ PlayState.create = function () {
     //Variables relating to the state of the game
     this.gameStarted = false;
 
+    //variables for keeping track of play time
+    this.date = new Date();
+    this.gameStartTime = 0;
+
     //Values pertaining to physics based logic 
     this.xAcceleration = .5;
     this.friction = .1;
@@ -87,6 +91,9 @@ PlayState.create = function () {
     this.addChild(this.scoreText);
 }
 
+
+
+
 /**
  *  sets the velocity of param box, based on param direction.
  * @param direction
@@ -96,6 +103,9 @@ PlayState.create = function () {
 PlayState.moveBox = function (direction, box) {
     //first keypress should start game
     this.gameStarted = true;
+    //keep track of what time the game started
+    this.gameStartTime = this.date.getTime();
+
 
     //move the box left
     if (direction == "left") {
@@ -303,7 +313,7 @@ PlayState.createBox = function (weight, xPos) {
     this.playerBoxes.push(this.playerBox);
 
 
-}
+};
 
 /**
 * This method is the main update loop. Move scrolling items here
