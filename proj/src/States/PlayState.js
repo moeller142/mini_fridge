@@ -331,7 +331,7 @@ PlayState.canMove = function (box, direction) {
         setBoxLeftWall(box, this.leftStageBound);
         canMove = false;
     } else if (rightWallX(box) + box.velocity > this.rightStageBound) {
-        setBoxRightWall(box, this.leftStageBound);
+        setBoxRightWall(box, this.rightStageBound);
         canMove = false;
     }
     var boxIndex = this.playerBoxes.indexOf(box);
