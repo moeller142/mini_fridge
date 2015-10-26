@@ -71,6 +71,7 @@ PlayState.create = function () {
 
     //create initial player box
     this.addPlayerBox(4, this.startX);
+    this.assignControls();
 };
 
 /**
@@ -78,22 +79,19 @@ PlayState.create = function () {
  * @param direction
  * @param box
  */
-PlayState.moveBox = function (direction, box) {
-    //first key press should start game
-    this.gameStarted = true;
-
+PlayState.moveBox = function (direction, box) {//first key press should start game
     if (direction == "left") {
         if (Math.abs(box.velocity) < this.maxXSpeed) box.velocity -= this.xAcceleration;
     } else if (direction == "right") {
         if (Math.abs(box.velocity) < this.maxXSpeed) box.velocity += this.xAcceleration;
     } else if (direction == "stop") {
+        if (Math.abs(box.velocity) < .2) {
+            box.velocity = 0;
+        }
         if (box.velocity < 0) {
             box.velocity += this.friction;
         } else if (box.velocity > 0) {
             box.velocity -= this.friction;
-
-        } else {
-            box.velocity = 0;
         }
     }
     box.transform.x += box.velocity;
@@ -103,46 +101,20 @@ PlayState.moveBox = function (direction, box) {
  *  checks keyboard input and moves appropriate box.
  */
 PlayState.checkInput = function () {
-    //move left most box
-/*    if (this.dKey.isDown && this.playerBoxes[0].canMoveLeft) {
-     this.moveBox("left", this.playerBoxes[0]);
-     } else if (this.fKey.isDown && this.playerBoxes[0].canMoveRight) {
-     this.moveBox("right", this.playerBoxes[0]);
-     } else if (this.playerBoxes[0].velocity != 0) {
-     this.moveBox("stop", this.playerBoxes[0]);
-     }
-     //move middle/right box if two boxes
-     if (this.playerBoxes.length > 1) {
-     if (this.gKey.isDown && this.playerBoxes[1].canMoveLeft) {
-     this.moveBox("left", this.playerBoxes[1]);
-     } else if (this.hKey.isDown && this.playerBoxes[1].canMoveRight) {
-     this.moveBox("right", this.playerBoxes[1]);
-     } else if (this.playerBoxes[1].velocity != 0) {
-
-     this.moveBox("stop", this.playerBoxes[1]);
-     }
-     }
-     //move third box if 3 boxes
-     if (this.playerBoxes.length > 2) {
-     if (this.jKey.isDown && this.playerBoxes[2].canMoveLeft) {
-     this.moveBox("left", this.playerBoxes[2]);
-     } else if (this.kKey.isDown && this.playerBoxes[2].canMoveRight) {
-     this.moveBox("right", this.playerBoxes[2]);
-     } else if (this.playerBoxes[2].velocity != 0) {
-     this.moveBox("stop", this.playerBoxes[2]);
-     }
-     }*/
+    this.gameStarted = true;
 
     for (var i=0; i < this.playerBoxes.length; i++) {
         var box = this.playerBoxes[i];
         if (this.canMove(box)) {
-            if (box.leftKey.isDown) {
+            if (box.leftKey.isDown && !box.rightKey.justPressed()) {
                 this.moveBox("left", box);
-            } else if (box.rightKey.isDown) {
-                this.moveBox("right", box);
-            } else {
-                this.moveBox("stop", box);
+                break;
             }
+            if (box.rightKey.isDown && !box.leftKey.justPressed()) {
+                this.moveBox("right", box);
+                break;
+            }
+            this.moveBox("stop", box);
         }
     }
 };
@@ -150,13 +122,13 @@ PlayState.checkInput = function () {
 /**
  * moves any enemies which are on screen
  */
-PlayState.moveSplitters = function (splitters) {
-    for (var i = 0; i < splitters.length; i++) {
+PlayState.moveSplitters = function () {
+    for (var i = 0; i < this.splitters.length; i++) {
         //if splitter is on screen
-        if (splitters[i].y - this.enemyHeight < game.stage.height) {
-            splitters[i].transform.y += this.enemyFallSpeed;
+        if (this.splitters[i].y - this.enemyHeight < game.stage.height) {
+            this.splitters[i].transform.y += this.enemyFallSpeed;
         } else {
-            splitters.shift().destroy();
+            this.splitters.shift().destroy();
         }
     }
 };
@@ -165,7 +137,7 @@ PlayState.moveSplitters = function (splitters) {
  * Creates new enemy and adds it to the splitters queue
  *
  */
-PlayState.createEnemy = function () {
+PlayState.addSplitter = function () {
     //create a new enemy
     this.splitter1 = new Kiwi.Plugins.Primitives.Triangle({
         state: this,
@@ -179,6 +151,13 @@ PlayState.createEnemy = function () {
     });
     this.addChild(this.splitter1);
     this.splitters.push(this.splitter1);
+};
+
+PlayState.randomGenSplitter = function() {
+    // figure out if a new enemy should spawn
+    if ((this.frameCount % 10 == 0 && this.frameCount != 0) && (Math.random() <= .7)) {
+        this.addSplitter();
+    }
 };
 
 /**
@@ -207,8 +186,10 @@ PlayState.splitBox = function (box) {
         this.playerBoxes.splice(posInArray, 1);
 
         //create two new boxes
-        this.addPlayerBox(box.weight / 2, box.x - box.width);
-        this.addPlayerBox(box.weight / 2, box.x + box.width);
+        var leftBox = this.addPlayerBox(box.weight / 2, box.x - box.width / 2);
+        var rightBox = this.addPlayerBox(box.weight / 2, box.x + box.width / 2);
+        leftBox.velocity = -3;
+        rightBox.velocity = 3;
         //delete the box
         box.destroy();
     }
@@ -218,7 +199,7 @@ PlayState.splitBox = function (box) {
         this.playerBoxes.splice(posInArray, 1);
 
         //create a new box
-        this.addPlayerBox(box.weight / 2, box.x + box.x);
+        this.addPlayerBox(box.weight / 2, box.x);
 
         //delete the box
         box.destroy();
@@ -228,8 +209,23 @@ PlayState.splitBox = function (box) {
         this.playerBoxes.splice(posInArray, 1);
         box.destroy();
     }
+    this.assignControls();
+
     //return false if there are no more boxes
     return (this.playerBoxes.length > 0)
+};
+
+PlayState.assignControls = function () {
+    //sort the player boxes so key presses do the correct thing
+    this.playerBoxes.sort(function (a, b) {
+        return a.x - b.x;
+    });
+
+    for (var i=0; i < this.playerBoxes.length; i++) {
+        var box = this.playerBoxes[i];
+        box.leftKey = this.keyArray[i * 2];
+        box.rightKey = this.keyArray[i * 2 + 1];
+    }
 };
 
 /**
@@ -265,14 +261,30 @@ PlayState.addPlayerBox = function (mass, xPos) {
     box.weight = mass;
     this.addChild(box);
     this.playerBoxes.push(box);
-    //sort the player boxes so key presses do the correct thing
-    this.playerBoxes.sort(function (a, b) {
-        return a.x = b.x;
-    });
+    return box;
+};
 
-    var index = this.playerBoxes.indexOf(box);
-    box.leftKey = this.keyArray[index * 2];
-    box.rightKey = this.keyArray[index * 2 + 1];
+PlayState.checkPlayerSplitterCollision = function() {
+    //check to see if any of the splitters hit any of the player boxes
+    var i=0;
+    var splitter = this.splitters[i];
+    while(typeof splitter != "undefined" && splitter.y > this.startY - 51) {
+        if (splitter.y < this.startY - 49) {
+            //could be a hit
+            //check all player boxes
+            for (var j=0; j < this.playerBoxes.length; j++) {
+                if (this.splitterOverBox(this.playerBoxes[j], splitter)) {
+                    //hit!
+                    //if they do, split or destroy the box - if this is the last box,
+                    // GAME OVER
+                    if (!this.splitBox(this.playerBoxes[j])) {
+                        this.gameOver();
+                    }
+                }
+            }
+        }
+        splitter = this.splitters[i++];
+    }
 };
 
 /**
@@ -284,36 +296,21 @@ PlayState.update = function () {
     Kiwi.State.prototype.update.call(this);
 
     if (this.gameStarted) {
-        this.moveSplitters(this.splitters);
+        this.moveSplitters();
 
-        // figure out if a new enemy should spawn
-        if ((this.frameCount % 20 == 0 && this.frameCount != 0) && (Math.random() <= .7)) {
-            this.createEnemy();
-        }
+        this.randomGenSplitter();
 
+        this.checkPlayerSplitterCollision();
 
-        //TODO redesign this control flow?
-        //check to see if any of the splitters hit any of the player boxes
-        for (var i=0; i < this.splitters.length; i++) {
-            if (this.splitters[i].y == this.startY - 1 / 2 * 100) {
-                //could be a hit
-                //check all player boxes
-                for (var j=0; j < this.playerBoxes.length; j++) {
-                    if (this.splitterOverBox(this.playerBoxes[j], this.splitters[i])) {
-                        //hit!
-                        //if they do, split or destroy the box - if this is the last box  - GAME OVER
-                        if (!this.splitBox(this.playerBoxes[j])) {
-                            this.gameStarted = false;
-                            game.states.switchState("MenuState");
-                        }
-                    }
-                }
-            }
-        }
         this.frameCount++;
     }
     //check for keyboard input and set box velocity based on key pressed
     this.checkInput();
+};
+
+PlayState.gameOver = function() {
+    this.gameStarted = false;
+    game.states.switchState("GameOverState");
 };
 
 /**
