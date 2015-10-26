@@ -1,9 +1,9 @@
 /**
  * Created by kevinholland on 10/23/15.
  */
-var MenuState = new Kiwi.State('MenuState');
+var GameOverState = new Kiwi.State('GameOverState');
 
-MenuState.create = function() {
+GameOverState.create = function() {
     //Switch the background colour back to white from purple
     this.game.stage.color = 'FFEDD1';
 
@@ -18,7 +18,7 @@ MenuState.create = function() {
     this.animationStarted = false;
 };
 
-MenuState.createBackground = function() {
+GameOverState.createBackground = function() {
     this.background = new Kiwi.HUD.Widget.MenuItem(this.game, "",
         this.game.stage.width / 2 - 200,
         this.game.stage.height / 2 - 100 - 30);
@@ -32,27 +32,24 @@ MenuState.createBackground = function() {
     this.menu.addMenuItem(this.background);
 };
 
-MenuState.createPlayButton = function() {
-    this.playButton = new Kiwi.HUD.Widget.MenuItem(this.game, "play.", 0, 0);
+GameOverState.createPlayButton = function() {
+    this.playButton = new Kiwi.HUD.Widget.MenuItem(this.game, "play again.", 0, 0);
     this.playButton.x = this.game.stage.width / 2 + 10;
     this.playButton.y = this.game.stage.height / 2;
-
     this.playButton.input.onDown.add(function() {
         this.startGameSegue();
     }, this);
-
     this.addButton(this.playButton);
 };
 
-MenuState.createTutorialButton = function() {
-    this.tutButton = new Kiwi.HUD.Widget.MenuItem(this.game, "tutorial.", 0, 0);
-    this.tutButton.x = this.game.stage.width / 2 - 140;
-    this.tutButton.y = this.game.stage.height / 2;
-
+GameOverState.createTutorialButton = function() {
+    this.tutButton = new Kiwi.HUD.Widget.MenuItem(this.game, "highscores.", 0, 0);
+    this.tutButton.x = game.stage.width / 2 - 140;
+    this.tutButton.y = game.stage.height / 2;
     this.addButton(this.tutButton);
 };
 
-MenuState.addButton = function(button) {
+GameOverState.addButton = function(button) {
     styleButton(button);
 
     button.input.onOver.add(function () {
@@ -65,24 +62,24 @@ MenuState.addButton = function(button) {
     this.menu.addMenuItem(button);
 };
 
-MenuState.drawGameText = function() {
-    this.gameText = new Kiwi.HUD.Widget.TextField(this.game, "Splittr");
+GameOverState.drawGameText = function() {
+    this.gameText = new Kiwi.HUD.Widget.TextField(this.game, "you died.");
     styleHeader(this.gameText);
 
-    this.gameText.x = this.game.stage.width / 2 - 80;
+    this.gameText.x = this.game.stage.width / 2 - 70;
     this.gameText.y = this.game.stage.height / 2 - 100;
 
     this.menu.addMenuItem(this.gameText);
 };
 
-MenuState.hideElements = function() {
+GameOverState.hideElements = function() {
     var items = this.menu.menuItems;
     for (var i = 0; i < items.length; i++) {
         hideElement(items[i]);
     }
 };
 
-MenuState.startGameSegue = function() {
+GameOverState.startGameSegue = function() {
     //hide all elements that are not play button
     var items = this.menu.menuItems;
     for (var i = 0; i < items.length; i++) {
@@ -101,7 +98,7 @@ MenuState.startGameSegue = function() {
     //game.switchState('PlayState');
 };
 
-MenuState.update = function() {
+GameOverState.update = function() {
     if (this.startAnimation) {
         //move background up
         this.background.y -= 40;
@@ -132,19 +129,19 @@ function styleHeader(field) {
     field.style.fontWeight = '300';
     field.style.fontSize = 'xx-large';
     field.style.textAlign = 'center';
+    field.style.width = '160px';
     field.style.textShadow = '0px 0px 10px #888';
 }
 
 function styleButton(button) {
     button.style.color = 'white';
     button.style.display = 'block';
-    button.style.boxSizing = 'border-box';
     button.style.fontFamily = '\'Roboto\', sans-serif';
     button.style.fontWeight = '200';
-    button.style.fontSize = 'x-large';
-    button.style.width = (this.menuWidth * 2).toString() + 'px';
-    button.style.textAlign = 'center';
+    button.style.fontSize = '20px';
+    button.style.width = '100px';
     button.style.cursor = 'pointer';
+    button.style.textAlign = 'center';
     button.style.padding = '0.5em 1em';
     button.style.backgroundColor = '#115B89';
     button.style.boxShadow = '0px 0px 10px #555';
